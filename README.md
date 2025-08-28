@@ -1,3 +1,5 @@
+[中文](./README_CN.md)
+
 # Introduction
 This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME images.
 
@@ -32,9 +34,12 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 
 # Flashing
 - SD Card Raw Image
-Files ending with *.img.zip can be written to SD card using [balenaEtcher](https://etcher.balena.io/), or extracted and written using the dd command.
+
+  Files ending with *.img.zip can be written to SD card using [balenaEtcher](https://etcher.balena.io/), or extracted and written using the dd command.
+
 - Custom Image
-Files ending with .zip can be flashed using Titan Flasher, or extracted and flashed using fastboot.
+
+  Files ending with .zip can be flashed using Titan Flasher, or extracted and flashed using fastboot.
 
 Firmware `root` user password: `bianbu`
 
