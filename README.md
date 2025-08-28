@@ -1,6 +1,10 @@
 # Introduction
 This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME images.
 
+
+https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
+
+
 # GNOME Image Features
 - Pre-installed native GNOME desktop with GPU support
 - Pre-installed Chromium browser with hardware video decoding support
