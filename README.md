@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 - Pre-configured [SpacemiT K1 Debian software sources](https://archive.spacemit.com/debian/)
 - Wi-Fi and Ethernet support
 
-# Features Not Yet Adapted
+**Features Not Yet Adapted**
 - FFmpeg and GStreamer frameworks
 - Video applications
 - Camera applications
@@ -26,9 +26,9 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 - LicheePi 3A (Not Tested)
 
 # Image Download
-- Official: https://archive.spacemit.com/image/k1/version/debian/
-- Baidu Cloud: https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm (Extraction code: vezm)
-- Google Drive: https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharing
+- Official: [Link](https://archive.spacemit.com/image/k1/version/debian/)
+- Baidu Cloud: [Link](https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm) (Extraction code: vezm)
+- Google Drive: [Link](https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharing)
 
 # Flashing
 - SD Card Raw Image
@@ -36,7 +36,8 @@ Files ending with *.img.zip can be written to SD card using [balenaEtcher](https
 - Custom Image
 Files ending with .zip can be flashed using Titan Flasher, or extracted and flashed using fastboot.
 
-Firmware root user password: bianbu
+Firmware `root` user password: `bianbu`
+
 For Titan Flasher flashing, please refer to the [Flashing Tool User Manual](https://developer.spacemit.com/documentation?token=O6wlwlXcoiBZUikVNh2cczhin5d).
 
 # Creating Your Own Image
@@ -63,8 +64,9 @@ To maximize the chances of your pull request being accepted, please follow these
 
 1. Write unit tests for all bug fixes and new features. If your code doesn't have tests, it won't be merged.
 2. Minimize the number of changes in each pull request. Try to solve one problem at a time.
-3. Use conventional commit messages as pull request titles. Examples:
+3. Use [conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as pull request titles. Examples:
    - New feature: `feat: adding foo API`
    - Bug fix: `fix: issue with foo API`
    - Documentation change: `docs: adding foo API documentation`
 
+# TODO
