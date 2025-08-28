@@ -22,9 +22,9 @@ This project provides a one-click script to build SpacemiT K1 Debian 13 images t
 - LicheePi 3A (Not Tested)
 
 # Image Download
-Official: https://archive.spacemit.com/image/k1/version/debian/
-Baidu Cloud: https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm Extraction code: vezm
-Google Drive: https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharing
+- Official: https://archive.spacemit.com/image/k1/version/debian/
+- Baidu Cloud: https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm (Extraction code: vezm)
+- Google Drive: https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharing
 
 # Flashing
 - SD Card Raw Image
@@ -64,6 +64,3 @@ To maximize the chances of your pull request being accepted, please follow these
    - Bug fix: `fix: issue with foo API`
    - Documentation change: `docs: adding foo API documentation`
 
-```shellscript
-sudo ./debian-image-create.sh
-```
