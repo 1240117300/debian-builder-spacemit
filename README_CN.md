@@ -28,9 +28,9 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 - LicheePi 3A (Not Tested)
 
 # 镜像下载
-官方：[链接](https://archive.spacemit.com/image/k1/version/debian/)
-百度云盘：[链接](https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm) （提取码: vezm） 
-Google Drive：[链接](https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharin)
+- 官方：[链接](https://archive.spacemit.com/image/k1/version/debian/)
+- 百度云盘：[链接](https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm) （提取码: vezm） 
+- Google Drive：[链接](https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharin)
 
 # 刷机
 - sdcard raw 镜像
