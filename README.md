@@ -75,3 +75,6 @@ To maximize the chances of your pull request being accepted, please follow these
    - Documentation change: `docs: adding foo API documentation`
 
 # TODO
+- Added the ability to create a desktop13 minimal image in the script
+- Added the SpacemiT AI package
+- Added the trixie update suite
