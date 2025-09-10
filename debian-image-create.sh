@@ -141,6 +141,11 @@ EOF
 
     if [ -n "$MIRROR" ]; then
         chroot $TARGET_ROOTFS /bin/bash -c "sed -i 's|http://deb.debian.org|http://$MIRROR|g' /etc/apt/sources.list"
+    else
+        cat > $TARGET_ROOTFS/etc/apt/sources.list <<EOF
+deb http://deb.debian.org/debian trixie main non-free-firmware
+deb http://deb.debian.org/debian trixie-updates main non-free-firmware
+EOF
     fi
 
     chroot $TARGET_ROOTFS /bin/bash -c "apt-get update"
@@ -402,10 +407,10 @@ main() {
 
 build_firmware() {
     local firmware_type="$1"
-    local original_firmware_name="$FIRMWARE_NAME"
-    FIRMWARE_NAME="${original_firmware_name}-${firmware_type}-k1-${CURRENT_DATETIME}"
+    local current_firmware_name="${FIRMWARE_NAME}-${firmware_type}-k1-${CURRENT_DATETIME}"
 
     inf "=== Building ${firmware_type} firmware ==="
+    inf "Firmware name: ${current_firmware_name}"
 
     clean_build
 
@@ -421,6 +426,7 @@ build_firmware() {
         install_desktop
     fi
 
+    # Install common packages for both types
     install_common_packages "$firmware_type"
 
     apply_common_config "$firmware_type"
@@ -432,9 +438,14 @@ build_firmware() {
 
     generate_ext4_images "$firmware_type"
 
+    local original_firmware_name="$FIRMWARE_NAME"
+    FIRMWARE_NAME="$current_firmware_name"
+
     make_image
 
-    inf "${firmware_type^} firmware build completed: $FIRMWARE_NAME"
+    FIRMWARE_NAME="$original_firmware_name"
+
+    inf "${firmware_type^} firmware build completed: ${current_firmware_name}"
 }
 
 build_minimal_firmware() {
