@@ -12,7 +12,8 @@
 #
 # Usage:
 #   sudo ./debian-image-create.sh
-#
+#   or sudo ./debian-image-create.sh minimal
+#   or sudo ./debian-image-create.sh desktop
 # Requirements:
 #   - debootstrap, qemu-user-static, wget, tar, genimage, zip, python3
 #
@@ -25,9 +26,24 @@ DEBIAN_MIRROR=http://deb.debian.org/debian
 MINBASE_TAR=debian-13-rootfs-desktop-k1.tar.gz
 # Get current date and time as version number
 CURRENT_DATETIME=$(date +%Y%m%d%H%M)
-FIRMWARE_NAME="debian-13-desktop-k1-$CURRENT_DATETIME"
-MIRROR="${1:-""}"
+FIRMWARE_NAME="debian-13"
 CONFIG_DIR=./config
+
+# Parameter processing
+if [ $# -eq 0 ]; then
+    # No parameters: build both firmware types
+    FIRMWARE_TYPE="all"
+    MIRROR=""
+elif [ $# -eq 1 ]; then
+    # One parameter: firmware type
+    FIRMWARE_TYPE="$1"
+    MIRROR=""
+elif [ $# -eq 2 ]; then
+    # Two parameters: firmware type and mirror
+    FIRMWARE_TYPE="$1"
+    MIRROR="$2"
+fi
+
 
 inf() { echo -e "\033[;34mInfo: $*\033[0m"; }
 err() { echo -e "\033[;31mError: $*\033[0m" >&2; exit 1; }
@@ -74,7 +90,7 @@ umount_filesystem() {
 clean_build() {
     inf "=== Cleaning old artifacts ==="
     umount_filesystem $TARGET_ROOTFS
-    find . -maxdepth 1 ! -name '.' ! -name "$MINBASE_TAR" ! -name "$(basename $0)" ! -name "config" -exec rm -rf {} +
+    find . -maxdepth 1 ! -name '.' ! -name "$MINBASE_TAR" ! -name "$(basename $0)" ! -name "config" ! -name "*.zip" ! -name "*.img.zip" -exec rm -rf {} +
 }
 
 check_and_extract_minbase() {
@@ -183,14 +199,25 @@ install_desktop() {
 }
 
 install_common_packages() {
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install chromium-browser-stable mpp vim ssh iproute2 v4l-utils"
+    local firmware_type="$1"
+
+    if [ "$firmware_type" = "minimal" ]; then
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install  systemd systemd-sysv vim iproute2 dbus"
+    else
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install chromium-browser-stable mpp vim ssh iproute2 v4l-utils"
+    fi
 }
 
 apply_common_config() {
+    local firmware_type="$1"
     inf "=== Common configuration ==="
     inf "reconfiguring locales"
 
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install locales task-chinese-s task-chinese-s-desktop"
+    if [ "$firmware_type" = "minimal" ]; then
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install locales"
+    else
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install locales task-chinese-s task-chinese-s-desktop"
+    fi
     chroot $TARGET_ROOTFS /bin/bash -c "echo 'locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8, zh_CN.UTF-8 UTF-8' | debconf-set-selections"
     chroot $TARGET_ROOTFS /bin/bash -c "echo 'locales locales/default_environment_locale select zh_CN.UTF-8' | debconf-set-selections"
     chroot $TARGET_ROOTFS /bin/bash -c "sed -i 's/^# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen"
@@ -215,6 +242,7 @@ apply_common_config() {
 }
 
 generate_ext4_images() {
+    local firmware_type="$1"
     inf "Generating ext4 images"
 
     UUID_BOOTFS=$(uuidgen)
@@ -228,7 +256,11 @@ EOF
     mv $TARGET_ROOTFS/boot/* bootfs
 
     mke2fs -d bootfs -L bootfs -t ext4 -U $UUID_BOOTFS bootfs.ext4 256M
-    mke2fs -d $TARGET_ROOTFS -L rootfs -t ext4 -N 524288 -U $UUID_ROOTFS rootfs.ext4 8192M
+    if [ "$firmware_type" = "minimal" ]; then
+        mke2fs -d $TARGET_ROOTFS -L rootfs -t ext4 -N 524288 -U $UUID_ROOTFS rootfs.ext4 2048M
+    else
+        mke2fs -d $TARGET_ROOTFS -L rootfs -t ext4 -N 524288 -U $UUID_ROOTFS rootfs.ext4 8192M
+    fi
 
     e2fsck -f -y bootfs.ext4
     e2fsck -f -y rootfs.ext4
@@ -336,6 +368,7 @@ make_image() {
 }
 
 main() {
+   local build_type="$FIRMWARE_TYPE"  # Default to build all if no argument provided
 
     # Must be executed with sudo
     if [ "$EUID" -ne 0 ]; then
@@ -344,6 +377,35 @@ main() {
 
     # Check and install system dependencies
     check_and_install_dependencies
+
+    case "$build_type" in
+        "minimal")
+            inf "=== Building minimal firmware only ==="
+            build_minimal_firmware
+            ;;
+        "desktop")
+            inf "=== Building desktop firmware only ==="
+            build_desktop_firmware
+            ;;
+        "all")
+            inf "=== Building both minimal and desktop firmware ==="
+            build_minimal_firmware
+            build_desktop_firmware
+            ;;
+        *)
+            err "Invalid argument. Use: minimal, desktop, or no argument for both"
+            ;;
+    esac
+
+    inf "Build finished successfully."
+}
+
+build_firmware() {
+    local firmware_type="$1"
+    local original_firmware_name="$FIRMWARE_NAME"
+    FIRMWARE_NAME="${original_firmware_name}-${firmware_type}-k1-${CURRENT_DATETIME}"
+
+    inf "=== Building ${firmware_type} firmware ==="
 
     clean_build
 
@@ -354,23 +416,43 @@ main() {
 
     mount_filesystem $TARGET_ROOTFS
 
-    install_desktop
+    # Install packages based on firmware type
+    if [ "$firmware_type" = "desktop" ]; then
+        install_desktop
+    fi
 
-    install_common_packages
+    install_common_packages "$firmware_type"
 
-    apply_common_config
+    apply_common_config "$firmware_type"
 
     # Cleanup
     chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get clean"
 
     umount_filesystem $TARGET_ROOTFS
 
-    generate_ext4_images
+    generate_ext4_images "$firmware_type"
 
     make_image
 
-    inf "Build finished successfully."
+    inf "${firmware_type^} firmware build completed: $FIRMWARE_NAME"
+}
+
+build_minimal_firmware() {
+    build_firmware "minimal"
+}
+
+build_desktop_firmware() {
+    build_firmware "desktop"
+}
+
+main_minimal() {
+    # Deprecated function, use main with "minimal" argument instead
+    main "minimal"
+}
+
+main_desktop() {
+    # Deprecated function, use main with "desktop" argument instead
+    main "desktop"
 }
 
 main "$@"
-
