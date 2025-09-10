@@ -177,6 +177,8 @@ EOF
     # bootloader and bianbu software
     chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install u-boot-spacemit opensbi-spacemit bianbu-esos linux-generic linux-tools-6.6.63"
     chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install img-gpu-powervr k1x-vpu-firmware k1x-cam spacemit-uart-bt spacemit-modules-usrload spacemit-flash-dtbs"
+
+    cp $CONFIG_DIR/bianbu.bmp $TARGET_ROOTFS/boot/bianbu.bmp
 }
 
 install_desktop() {
