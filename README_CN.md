@@ -115,6 +115,3 @@ sudo ./debian-image-create.sh xfce
 - 文档更改：`docs: adding foo API documentation`
 
 # TODO
-- 脚本增加制作desktop13 minimal镜像功能
-- 增加SpacemiT AI软件包
-- 增加trixie update suite
