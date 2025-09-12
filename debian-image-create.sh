@@ -14,6 +14,7 @@
 #   sudo ./debian-image-create.sh
 #   or sudo ./debian-image-create.sh minimal
 #   or sudo ./debian-image-create.sh desktop
+#   or sudo ./debian-image-create.sh xfce
 # Requirements:
 #   - debootstrap, qemu-user-static, wget, tar, genimage, zip, python3
 #
@@ -182,21 +183,29 @@ EOF
 }
 
 install_desktop() {
-    inf "=== Installing GNOME desktop ==="
-    chroot $TARGET_ROOTFS /bin/bash -c '
-    echo "keyboard-configuration  keyboard-configuration/xkb-model select pc105" | debconf-set-selections
-    echo "keyboard-configuration  keyboard-configuration/modelcode string pc105" | debconf-set-selections
-    echo "keyboard-configuration  keyboard-configuration/layoutcode string us" | debconf-set-selections
-    echo "keyboard-configuration  keyboard-configuration/variantcode string" | debconf-set-selections
-    echo "keyboard-configuration  keyboard-configuration/optionscode string" | debconf-set-selections
-    echo "keyboard-configuration  keyboard-configuration/backspace select guess" | debconf-set-selections
-    '
-    chroot $TARGET_ROOTFS /bin/bash -c "apt-get update"
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install tasksel whiptail"
-    chroot $TARGET_ROOTFS /bin/bash -c "tasksel install desktop gnome-desktop"
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive systemctl set-default graphical.target"
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install gnome-initial-setup"
+    local firmware_type="$1"
 
+    if [ "$firmware_type" = "desktop" ]; then
+        inf "=== Installing GNOME desktop ==="
+        chroot $TARGET_ROOTFS /bin/bash -c '
+        echo "keyboard-configuration  keyboard-configuration/xkb-model select pc105" | debconf-set-selections
+        echo "keyboard-configuration  keyboard-configuration/modelcode string pc105" | debconf-set-selections
+        echo "keyboard-configuration  keyboard-configuration/layoutcode string us" | debconf-set-selections
+        echo "keyboard-configuration  keyboard-configuration/variantcode string" | debconf-set-selections
+        echo "keyboard-configuration  keyboard-configuration/optionscode string" | debconf-set-selections
+        echo "keyboard-configuration  keyboard-configuration/backspace select guess" | debconf-set-selections
+        '
+        chroot $TARGET_ROOTFS /bin/bash -c "apt-get update"
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install tasksel whiptail"
+        chroot $TARGET_ROOTFS /bin/bash -c "tasksel install desktop gnome-desktop"
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive systemctl set-default graphical.target"
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install gnome-initial-setup"
+    elif [ "$firmware_type" = "xfce" ]; then
+        inf "=== Installing XFCE desktop ==="
+        chroot $TARGET_ROOTFS /bin/bash -c "apt-get update"
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install task-xfce-desktop"
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive systemctl set-default graphical.target"
+    fi
     # Install mesa
     chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install libegl1-mesa libglapi-mesa libgbm1 libgbm-dev libegl-mesa0 libgl1-mesa-dri libgles2-mesa libgl1-mesa-glx libglx-mesa0 libosmesa6 libwayland-egl1-mesa mesa-common-dev mesa-vdpau-drivers mesa-vulkan-drivers"
 
@@ -209,9 +218,11 @@ install_common_packages() {
     local firmware_type="$1"
 
     if [ "$firmware_type" = "minimal" ]; then
-        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install  systemd systemd-sysv vim iproute2 dbus"
-    else
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install systemd systemd-sysv vim iproute2 dbus"
+    elif [ "$firmware_type" = "desktop" ]; then
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install chromium-browser-stable mpp vim ssh iproute2 v4l-utils"
+    elif [ "$firmware_type" = "xfce" ]; then
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install mpp vim ssh iproute2 v4l-utils"
     fi
 }
 
@@ -239,6 +250,13 @@ apply_common_config() {
 
     inf "changing root password"
     chroot $TARGET_ROOTFS /bin/bash -c "echo root:bianbu | chpasswd"
+
+    if [ "$firmware_type" = "xfce" ]; then
+        # Create regular user
+        chroot $TARGET_ROOTFS /bin/bash -c "useradd -m -s /bin/bash user"
+        chroot $TARGET_ROOTFS /bin/bash -c "echo user:bianbu | chpasswd"
+        chroot $TARGET_ROOTFS /bin/bash -c "usermod -aG sudo user"
+    fi
 
     # Time server
     sed -i 's/^#NTP=.*/NTP=ntp.aliyun.com/' $TARGET_ROOTFS/etc/systemd/timesyncd.conf
@@ -391,16 +409,21 @@ main() {
             build_minimal_firmware
             ;;
         "desktop")
-            inf "=== Building desktop firmware only ==="
+            inf "=== Building GNOME desktop firmware only ==="
             build_desktop_firmware
+            ;;
+        "xfce")
+            inf "=== Building XFCE desktop firmware only ==="
+            build_xfce_firmware
             ;;
         "all")
-            inf "=== Building both minimal and desktop firmware ==="
+            inf "=== Building minimal, desktop and xfce firmware ==="
             build_minimal_firmware
             build_desktop_firmware
+            build_xfce_firmware
             ;;
         *)
-            err "Invalid argument. Use: minimal, desktop, or no argument for both"
+            err "Invalid argument. Use: minimal, desktop, xfce or no argument for all."
             ;;
     esac
 
@@ -424,8 +447,8 @@ build_firmware() {
     mount_filesystem $TARGET_ROOTFS
 
     # Install packages based on firmware type
-    if [ "$firmware_type" = "desktop" ]; then
-        install_desktop
+    if [ "$firmware_type" != "minimal" ]; then
+        install_desktop "$firmware_type"
     fi
 
     # Install common packages for both types
@@ -458,14 +481,8 @@ build_desktop_firmware() {
     build_firmware "desktop"
 }
 
-main_minimal() {
-    # Deprecated function, use main with "minimal" argument instead
-    main "minimal"
-}
-
-main_desktop() {
-    # Deprecated function, use main with "desktop" argument instead
-    main "desktop"
+build_xfce_firmware() {
+    build_firmware "xfce"
 }
 
 main "$@"
