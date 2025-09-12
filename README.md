@@ -1,20 +1,41 @@
 [中文](./README_CN.md)
 
 # Introduction
-This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME images.
+This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME, XFCE and Minimal images.
+
+# GNOME Image
 
 
 https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 
 
-# GNOME Image Features
+## Features
 - Pre-installed native GNOME desktop with GPU support
 - Pre-installed Chromium browser with hardware video decoding support
 - Pre-installed common toolkits: vim, ssh, iproute2, wget
-- Pre-configured [SpacemiT K1 Debian software sources](https://archive.spacemit.com/debian/)
+- Pre-configured [SpacemiT K1 Debian software sources](http://archive.spacemit.com/debian/)
 - Wi-Fi and Ethernet support
 
-**Features Not Yet Adapted**
+## Features Not Yet Adapted
+- FFmpeg and GStreamer frameworks
+- Video applications
+- Camera applications
+- Serial Bluetooth, such as rtl8852bs
+
+# XFCE Image
+
+
+https://github.com/user-attachments/assets/74c713ce-ddd6-481e-bc52-27d0fdc78ed1
+
+
+## Features
+- Pre-installed native XFCE desktop (GPU is not supported yet)
+- Pre-installed Chromium browser with hardware video decoding support
+- Pre-installed common toolkits: vim, ssh, iproute2, wget
+- Pre-configured [SpacemiT K1 Debian software sources](http://archive.spacemit.com/debian/)
+- Wi-Fi and Ethernet support
+
+## Features Not Yet Adapted
 - FFmpeg and GStreamer frameworks
 - Video applications
 - Camera applications
@@ -43,6 +64,8 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 
 Firmware `root` user password: `bianbu`
 
+XFCE image initial username: user, password: `bianbu`
+
 For Titan Flasher flashing, please refer to the [Flashing Tool User Manual](https://developer.spacemit.com/documentation?token=O6wlwlXcoiBZUikVNh2cczhin5d).
 
 # Creating Your Own Image
@@ -55,8 +78,25 @@ You need an X86 PC, preferably running Ubuntu LTS version, such as Ubuntu 24.04.
 Image creation requires qemu installation. Please install our recommended version by referring to the [qemu installation guide](https://bianbu.spacemit.com/system_integration/bianbu_3.0_rootfs_create/#qemu).
 
 ## Image Creation
+You can run the following command to create all three images simultaneously:
 ```bash
 sudo ./debian-image-create.sh
+```
+You can also specify parameters:
+
+- Minimal
+```bash
+sudo ./debian-image-create.sh minimal
+```
+
+- GNOME
+```bash
+sudo ./debian-image-create.sh desktop
+```
+
+- XFCE
+```bash
+sudo ./debian-image-create.sh xfce
 ```
 
 # Issue Reporting
@@ -75,6 +115,3 @@ To maximize the chances of your pull request being accepted, please follow these
    - Documentation change: `docs: adding foo API documentation`
 
 # TODO
-- Added the ability to create a desktop13 minimal image in the script
-- Added the SpacemiT AI package
-- Added the trixie update suite
