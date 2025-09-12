@@ -1,20 +1,40 @@
 [English](./README.md)
 
 # 简介
-本项目提供一键构建 SpacemiT K1 Debian 13 镜像的脚本，镜像开箱即用。目前支持构建 GNOME 镜像。
+本项目提供一键构建 SpacemiT K1 Debian 13 镜像的脚本，镜像开箱即用。目前支持构建 GNOME、XFCE和Minimal 镜像。
+
+# GNOME 镜像
 
 
 https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 
 
-# GNOME 镜像特性
+## 特性
 - 预装原生 GNOME 桌面，支持GPU
 - 预装 Chromium 浏览器，支持视频硬件解码
 - 预装常见工具包：vim、ssh、iproute2、wget
-- 预置 SpacemiT K1 debian 软件源
+- 预置 [SpacemiT K1 debian 软件源](http://archive.spacemit.com/debian/)
 - 支持 Wi-Fi、Ethernet
 
-**尚未适配的功能**
+## 尚未适配的功能
+- FFmpeg、GStreamer框架
+- 视频应用
+- 相机应用
+- 串口蓝牙，例如 rtl8852bs
+
+# XFCE 镜像
+
+
+https://github.com/user-attachments/assets/74c713ce-ddd6-481e-bc52-27d0fdc78ed1
+
+
+## 特性
+- 预装原生 XFCE 桌面（暂不支持GPU）
+- 预装常见工具包：vim、ssh、iproute2、wget
+- 预置 [SpacemiT K1 debian 软件源](http://archive.spacemit.com/debian/)
+- 支持 Wi-Fi、Ethernet
+
+## 尚未适配的功能
 - FFmpeg、GStreamer框架
 - 视频应用
 - 相机应用
@@ -43,6 +63,8 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 
 固件`root`用户的密码：`bianbu`
 
+XFCE镜像初始用户名：user，密码：`bianbu`
+
 Titan Flasher刷机参考[刷机工具使用手册](https://developer.spacemit.com/documentation?token=O6wlwlXcoiBZUikVNh2cczhin5d)。
 
 # 制作自己的镜像
@@ -55,8 +77,26 @@ Titan Flasher刷机参考[刷机工具使用手册](https://developer.spacemit.c
 制作镜像需要安装qemu，请安装我们推荐的版本，参考[qemu安装指南](https://bianbu.spacemit.com/system_integration/bianbu_3.0_rootfs_create/#qemu)。
 
 ## 镜像制作
+
+您可以运行下面指令来同时制作三种镜像：
 ```bash
 sudo ./debian-image-create.sh
+```
+也可以通过参数来指定：
+
+- Minimal
+```bash
+sudo ./debian-image-create.sh minimal
+```
+
+- GNOME
+```bash
+sudo ./debian-image-create.sh desktop
+```
+
+- XFCE
+```bash
+sudo ./debian-image-create.sh xfce
 ```
 
 # 问题反馈
